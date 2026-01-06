@@ -24,13 +24,13 @@ For each candidate, the endpoint should return the following information:
   - Acceptance Criteria
   - Tasks
   - A mermaid diagram representing the flow of the user story.
-- The user sotries should be written in markdown format.
-- The user stories will e stored in the directory `user-stories`and will be named `user-story-<number>.md` where <number> is the number of the user story.
+- The user stories should be written in markdown format.
+- The user stories will be stored in the directory `user-stories` and will be named `user-story-<number>.md` where <number> is the number of the user story.
 - The tasks should be stored in the directory `tasks` and will be named `task-<us_number>-<number>.md` where <number> is the number of the task and <us_number> is the number of the user story.
 - The tasks will contain the following sections:
   - Title
   - Estimation
-  - prority
+  - Priority
   - status
   - percentage completed
   - Description
