@@ -314,3 +314,34 @@ POST http://localhost:3010/candidates
 }
 ```
 
+## Nuevos Endpoints API
+
+### GET /positions/:id/candidates
+Obtiene todos los candidatos para una posición específica, incluyendo su etapa actual en el proceso de entrevista y su puntuación promedio.
+
+**Ejemplo:**
+```bash
+curl -X GET http://localhost:3010/positions/1/candidates
+```
+
+### PUT /candidates/:id/stage
+Actualiza la etapa actual del proceso de entrevista para un candidato específico.
+
+**Ejemplo:**
+```bash
+curl -X PUT http://localhost:3010/candidates/1/stage \
+  -H "Content-Type: application/json" \
+  -d '{"interviewStepId": 2}'
+```
+
+Para más detalles sobre estos endpoints, consulta el archivo [API-ENDPOINTS.md](API-ENDPOINTS.md).
+
+### Documentación Adicional
+
+- **User Stories**: Ver el directorio `user-stories/` para historias de usuario detalladas
+- **Tasks**: Ver el directorio `tasks/` para desglose de tareas
+- **Pruebas HTTP**: Ver `http-tests/ats-api-tests.http` para pruebas interactivas
+- **Pruebas cURL**: Ver `test-queries.txt` para ejemplos de comandos curl
+- **API Spec**: Ver `backend/api-spec.yaml` para especificación OpenAPI completa
+
+

@@ -1,0 +1,175 @@
+# ATS API Test Queries - CURL Commands
+
+## Base Configuration
+BASE_URL="http://localhost:3010"
+
+#############################################
+# Position Endpoints - GET /positions/:id/candidates
+#############################################
+
+## Test 1: Get all candidates for a specific position (Success case)
+curl -X GET "${BASE_URL}/positions/1/candidates" \
+  -H "Content-Type: application/json"
+
+## Test 2: Get candidates for non-existent position (404 case)
+curl -X GET "${BASE_URL}/positions/99999/candidates" \
+  -H "Content-Type: application/json"
+
+## Test 3: Get candidates with invalid position ID format (400 case)
+curl -X GET "${BASE_URL}/positions/invalid/candidates" \
+  -H "Content-Type: application/json"
+
+## Test 4: Get candidates for position 2
+curl -X GET "${BASE_URL}/positions/2/candidates" \
+  -H "Content-Type: application/json"
+
+## Test 5: Get candidates with verbose output (see headers)
+curl -v -X GET "${BASE_URL}/positions/1/candidates" \
+  -H "Content-Type: application/json"
+
+#############################################
+# Candidate Stage Update - PUT /candidates/:id/stage
+#############################################
+
+## Test 6: Update candidate stage (Success case)
+curl -X PUT "${BASE_URL}/candidates/1/stage" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "interviewStepId": 2
+  }'
+
+## Test 7: Update candidate stage with missing interviewStepId (400 case)
+curl -X PUT "${BASE_URL}/candidates/1/stage" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+
+## Test 8: Update candidate stage with invalid interviewStepId format (400 case)
+curl -X PUT "${BASE_URL}/candidates/1/stage" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "interviewStepId": "invalid"
+  }'
+
+## Test 9: Update stage for non-existent candidate (404 case)
+curl -X PUT "${BASE_URL}/candidates/99999/stage" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "interviewStepId": 1
+  }'
+
+## Test 10: Update candidate stage with invalid candidate ID format (400 case)
+curl -X PUT "${BASE_URL}/candidates/invalid/stage" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "interviewStepId": 1
+  }'
+
+## Test 11: Update candidate stage with non-existent interview step (400 case)
+curl -X PUT "${BASE_URL}/candidates/1/stage" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "interviewStepId": 99999
+  }'
+
+## Test 12: Update candidate stage with verbose output
+curl -v -X PUT "${BASE_URL}/candidates/1/stage" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "interviewStepId": 2
+  }'
+
+#############################################
+# Existing Endpoints (for reference/testing)
+#############################################
+
+## Test 13: Get candidate by ID
+curl -X GET "${BASE_URL}/candidates/1" \
+  -H "Content-Type: application/json"
+
+## Test 14: Create a new candidate
+curl -X POST "${BASE_URL}/candidates" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "phone": "1234567890",
+    "address": "123 Main Street",
+    "educations": [
+      {
+        "institution": "University of Technology",
+        "title": "Computer Science",
+        "startDate": "2018-09-01",
+        "endDate": "2022-06-15"
+      }
+    ],
+    "workExperiences": [
+      {
+        "company": "Tech Corp",
+        "position": "Software Engineer",
+        "description": "Full-stack development",
+        "startDate": "2022-07-01",
+        "endDate": null
+      }
+    ],
+    "cv": {
+      "filePath": "uploads/john-doe-cv.pdf",
+      "fileType": "application/pdf"
+    }
+  }'
+
+#############################################
+# Workflow Tests
+#############################################
+
+## Test 15: Complete workflow - Get position candidates, update one candidate's stage
+# Step 1: Get all candidates for position 1
+curl -X GET "${BASE_URL}/positions/1/candidates" \
+  -H "Content-Type: application/json" | jq '.'
+
+# Step 2: Update the first candidate's stage to interview step 2
+# (Replace candidate ID based on results from step 1)
+curl -X PUT "${BASE_URL}/candidates/1/stage" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "interviewStepId": 2
+  }' | jq '.'
+
+# Step 3: Verify the update by getting position candidates again
+curl -X GET "${BASE_URL}/positions/1/candidates" \
+  -H "Content-Type: application/json" | jq '.'
+
+#############################################
+# Pretty Print Responses (requires jq)
+#############################################
+
+## Get candidates with formatted JSON output
+curl -s -X GET "${BASE_URL}/positions/1/candidates" \
+  -H "Content-Type: application/json" | jq '.'
+
+## Update candidate stage with formatted output
+curl -s -X PUT "${BASE_URL}/candidates/1/stage" \
+  -H "Content-Type: application/json" \
+  -d '{"interviewStepId": 2}' | jq '.'
+
+#############################################
+# Performance Testing
+#############################################
+
+## Time the request to get candidates
+time curl -s -X GET "${BASE_URL}/positions/1/candidates" \
+  -H "Content-Type: application/json" > /dev/null
+
+## Time the request to update candidate stage
+time curl -s -X PUT "${BASE_URL}/candidates/1/stage" \
+  -H "Content-Type: application/json" \
+  -d '{"interviewStepId": 2}' > /dev/null
+
+#############################################
+# Notes
+#############################################
+# - Replace position IDs, candidate IDs, and interview step IDs with actual values from your database
+# - Use 'jq' for pretty-printed JSON output (install with: apt-get install jq or brew install jq)
+# - Add '-v' flag for verbose output including headers
+# - Add '-s' flag for silent mode (no progress bar)
+# - Use 'time' command to measure request duration

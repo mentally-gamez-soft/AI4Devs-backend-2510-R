@@ -185,4 +185,199 @@ paths:
           description: Invalid file type, only PDF and DOCX are allowed
         '500':
           description: Error during the file upload process
-
+  /candidates/{id}:
+    get:
+      summary: Get a candidate by ID
+      description: Retrieves a candidate's information by their unique identifier
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the candidate
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Candidate retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  firstName:
+                    type: string
+                  lastName:
+                    type: string
+                  email:
+                    type: string
+                  phone:
+                    type: string
+                  address:
+                    type: string
+        '400':
+          description: Invalid ID format
+        '404':
+          description: Candidate not found
+        '500':
+          description: Internal server error
+  /candidates/{id}/stage:
+    put:
+      summary: Update candidate's interview stage
+      description: Updates the current interview stage/step for a specific candidate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the candidate
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - interviewStepId
+              properties:
+                interviewStepId:
+                  type: integer
+                  description: The ID of the interview step to move the candidate to
+                  example: 2
+      responses:
+        '200':
+          description: Candidate stage updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Candidate stage updated successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: Application ID
+                      candidateId:
+                        type: integer
+                      currentInterviewStep:
+                        type: integer
+                      candidate:
+                        type: object
+                        properties:
+                          firstName:
+                            type: string
+                          lastName:
+                            type: string
+                          email:
+                            type: string
+                      interviewStep:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          orderIndex:
+                            type: integer
+                      position:
+                        type: object
+                        properties:
+                          title:
+                            type: string
+        '400':
+          description: Bad request (invalid ID format, missing interviewStepId, or invalid interview step)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '404':
+          description: Candidate not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '500':
+          description: Internal server error
+  /positions/{id}/candidates:
+    get:
+      summary: Get all candidates for a position
+      description: Retrieves all candidates who have applied to a specific position, including their current interview step and average interview score
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the position
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Candidates retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  positionId:
+                    type: integer
+                    description: The ID of the position
+                    example: 1
+                  candidatesCount:
+                    type: integer
+                    description: Total number of candidates for this position
+                    example: 5
+                  candidates:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        fullName:
+                          type: string
+                          description: Full name of the candidate (firstName + lastName)
+                          example: John Doe
+                        currentInterviewStep:
+                          type: string
+                          description: Name of the current interview step
+                          example: Technical Interview
+                        averageScore:
+                          type: number
+                          nullable: true
+                          description: Average score across all interviews, or null if no interviews have been scored
+                          example: 85.5
+        '400':
+          description: Invalid position ID format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '404':
+          description: Position not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '500':
+          description: Internal server error

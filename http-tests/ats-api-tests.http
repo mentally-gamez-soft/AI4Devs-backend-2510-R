@@ -1,0 +1,146 @@
+### ATS API Tests
+### Base URL
+@baseUrl = http://localhost:3010
+
+### Variables - Update these based on your test data
+@positionId = 1
+@candidateId = 1
+@interviewStepId = 2
+
+#############################################
+# Position Endpoints
+#############################################
+
+### Test 1: Get candidates for a specific position (Success case)
+GET {{baseUrl}}/positions/{{positionId}}/candidates
+Content-Type: application/json
+
+### Test 2: Get candidates for non-existent position (404 case)
+GET {{baseUrl}}/positions/99999/candidates
+Content-Type: application/json
+
+### Test 3: Get candidates with invalid position ID format (400 case)
+GET {{baseUrl}}/positions/invalid/candidates
+Content-Type: application/json
+
+### Test 4: Get candidates for position with ID 2
+GET {{baseUrl}}/positions/2/candidates
+Content-Type: application/json
+
+#############################################
+# Candidate Stage Update Endpoints
+#############################################
+
+### Test 5: Update candidate stage (Success case)
+PUT {{baseUrl}}/candidates/{{candidateId}}/stage
+Content-Type: application/json
+
+{
+  "interviewStepId": {{interviewStepId}}
+}
+
+### Test 6: Update candidate stage with missing interviewStepId (400 case)
+PUT {{baseUrl}}/candidates/{{candidateId}}/stage
+Content-Type: application/json
+
+{
+}
+
+### Test 7: Update candidate stage with invalid interviewStepId format (400 case)
+PUT {{baseUrl}}/candidates/{{candidateId}}/stage
+Content-Type: application/json
+
+{
+  "interviewStepId": "invalid"
+}
+
+### Test 8: Update stage for non-existent candidate (404 case)
+PUT {{baseUrl}}/candidates/99999/stage
+Content-Type: application/json
+
+{
+  "interviewStepId": 1
+}
+
+### Test 9: Update candidate stage with invalid candidate ID format (400 case)
+PUT {{baseUrl}}/candidates/invalid/stage
+Content-Type: application/json
+
+{
+  "interviewStepId": 1
+}
+
+### Test 10: Update candidate stage with non-existent interview step (400 case)
+PUT {{baseUrl}}/candidates/{{candidateId}}/stage
+Content-Type: application/json
+
+{
+  "interviewStepId": 99999
+}
+
+#############################################
+# Existing Candidate Endpoints (for reference)
+#############################################
+
+### Test 11: Get candidate by ID
+GET {{baseUrl}}/candidates/{{candidateId}}
+Content-Type: application/json
+
+### Test 12: Create new candidate
+POST {{baseUrl}}/candidates
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "lastName": "User",
+  "email": "test.user@example.com",
+  "phone": "1234567890",
+  "address": "123 Test Street",
+  "educations": [
+    {
+      "institution": "Test University",
+      "title": "Computer Science",
+      "startDate": "2018-09-01",
+      "endDate": "2022-06-15"
+    }
+  ],
+  "workExperiences": [
+    {
+      "company": "Test Company",
+      "position": "Software Developer",
+      "description": "Developing software",
+      "startDate": "2022-07-01",
+      "endDate": null
+    }
+  ],
+  "cv": {
+    "filePath": "uploads/test-cv.pdf",
+    "fileType": "application/pdf"
+  }
+}
+
+#############################################
+# Combined workflow test
+#############################################
+
+### Test 13: Full workflow - Create candidate, then update their stage
+# Step 1: Create a candidate (run this first)
+POST {{baseUrl}}/candidates
+Content-Type: application/json
+
+{
+  "firstName": "Workflow",
+  "lastName": "Test",
+  "email": "workflow.test@example.com",
+  "phone": "9876543210",
+  "address": "456 Workflow Ave",
+  "educations": [],
+  "workExperiences": [],
+  "cv": {}
+}
+
+### Step 2: Note the candidate ID from the response above, then update stage
+# PUT {{baseUrl}}/candidates/{ID_FROM_ABOVE}/stage
+# {
+#   "interviewStepId": 1
+# }
