@@ -17,8 +17,8 @@ export const getCandidatesByPositionController = async (req: Request, res: Respo
             });
         }
 
-        // Get candidates for the position
-        const candidates = await getCandidatesByPosition(positionId);
+        // Get candidates for the position using the shared Prisma client
+        const candidates = await getCandidatesByPosition(positionId, req.prisma);
 
         // Handle position not found
         if (candidates === null) {

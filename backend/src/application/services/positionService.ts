@@ -1,7 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
-
 interface CandidateWithStats {
     fullName: string;
     currentInterviewStep: string;
@@ -11,9 +9,13 @@ interface CandidateWithStats {
 /**
  * Retrieves all candidates for a specific position with their current interview step and average score
  * @param positionId - The ID of the position to get candidates for
+ * @param prisma - The Prisma client instance to use for database queries
  * @returns Array of candidates with their stats, or null if position doesn't exist
  */
-export const getCandidatesByPosition = async (positionId: number): Promise<CandidateWithStats[] | null> => {
+export const getCandidatesByPosition = async (
+    positionId: number,
+    prisma: PrismaClient
+): Promise<CandidateWithStats[] | null> => {
     try {
         // First verify the position exists
         const position = await prisma.position.findUnique({

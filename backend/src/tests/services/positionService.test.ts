@@ -26,7 +26,7 @@ describe('Position Service - getCandidatesByPosition', () => {
     it('should return null when position does not exist', async () => {
         (prisma.position.findUnique as jest.Mock).mockResolvedValue(null);
 
-        const result = await getCandidatesByPosition(999);
+        const result = await getCandidatesByPosition(999, prisma);
 
         expect(result).toBeNull();
         expect(prisma.position.findUnique).toHaveBeenCalledWith({
@@ -38,7 +38,7 @@ describe('Position Service - getCandidatesByPosition', () => {
         (prisma.position.findUnique as jest.Mock).mockResolvedValue({ id: 1, title: 'Test Position' });
         (prisma.application.findMany as jest.Mock).mockResolvedValue([]);
 
-        const result = await getCandidatesByPosition(1);
+        const result = await getCandidatesByPosition(1, prisma);
 
         expect(result).toEqual([]);
         expect(prisma.application.findMany).toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe('Position Service - getCandidatesByPosition', () => {
         (prisma.position.findUnique as jest.Mock).mockResolvedValue(mockPosition);
         (prisma.application.findMany as jest.Mock).mockResolvedValue(mockApplications);
 
-        const result = await getCandidatesByPosition(1);
+        const result = await getCandidatesByPosition(1, prisma);
 
         expect(result).toHaveLength(1);
         expect(result![0]).toEqual({
@@ -95,7 +95,7 @@ describe('Position Service - getCandidatesByPosition', () => {
         (prisma.position.findUnique as jest.Mock).mockResolvedValue(mockPosition);
         (prisma.application.findMany as jest.Mock).mockResolvedValue(mockApplications);
 
-        const result = await getCandidatesByPosition(1);
+        const result = await getCandidatesByPosition(1, prisma);
 
         expect(result![0].averageScore).toBe(85);
     });
@@ -114,7 +114,7 @@ describe('Position Service - getCandidatesByPosition', () => {
         (prisma.position.findUnique as jest.Mock).mockResolvedValue(mockPosition);
         (prisma.application.findMany as jest.Mock).mockResolvedValue(mockApplications);
 
-        const result = await getCandidatesByPosition(1);
+        const result = await getCandidatesByPosition(1, prisma);
 
         expect(result![0].averageScore).toBeNull();
     });
@@ -138,7 +138,7 @@ describe('Position Service - getCandidatesByPosition', () => {
         (prisma.position.findUnique as jest.Mock).mockResolvedValue(mockPosition);
         (prisma.application.findMany as jest.Mock).mockResolvedValue(mockApplications);
 
-        const result = await getCandidatesByPosition(1);
+        const result = await getCandidatesByPosition(1, prisma);
 
         // Should only average the non-null scores: (80 + 90) / 2 = 85
         expect(result![0].averageScore).toBe(85);
@@ -158,7 +158,7 @@ describe('Position Service - getCandidatesByPosition', () => {
         (prisma.position.findUnique as jest.Mock).mockResolvedValue(mockPosition);
         (prisma.application.findMany as jest.Mock).mockResolvedValue(mockApplications);
 
-        const result = await getCandidatesByPosition(1);
+        const result = await getCandidatesByPosition(1, prisma);
 
         expect(result![0].fullName).toBe('Mary Johnson');
     });
@@ -189,7 +189,7 @@ describe('Position Service - getCandidatesByPosition', () => {
         (prisma.position.findUnique as jest.Mock).mockResolvedValue(mockPosition);
         (prisma.application.findMany as jest.Mock).mockResolvedValue(mockApplications);
 
-        const result = await getCandidatesByPosition(1);
+        const result = await getCandidatesByPosition(1, prisma);
 
         expect(result).toHaveLength(3);
         expect(result![0].fullName).toBe('John Doe');
@@ -201,6 +201,6 @@ describe('Position Service - getCandidatesByPosition', () => {
     it('should handle database errors appropriately', async () => {
         (prisma.position.findUnique as jest.Mock).mockRejectedValue(new Error('Database connection error'));
 
-        await expect(getCandidatesByPosition(1)).rejects.toThrow('Database connection error');
+        await expect(getCandidatesByPosition(1, prisma)).rejects.toThrow('Database connection error');
     });
 });
