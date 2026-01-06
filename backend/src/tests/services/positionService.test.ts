@@ -203,4 +203,24 @@ describe('Position Service - getCandidatesByPosition', () => {
 
         await expect(getCandidatesByPosition(1, prisma)).rejects.toThrow('Database connection error');
     });
+
+    it('should return null for currentInterviewStep when interview step is missing', async () => {
+        const mockPosition = { id: 1, title: 'Software Engineer' };
+        const mockApplications = [
+            {
+                id: 1,
+                candidate: { firstName: 'Charlie', lastName: 'Brown' },
+                interviewStep: null,
+                interviews: [{ score: 80 }],
+            },
+        ];
+
+        (prisma.position.findUnique as jest.Mock).mockResolvedValue(mockPosition);
+        (prisma.application.findMany as jest.Mock).mockResolvedValue(mockApplications);
+
+        const result = await getCandidatesByPosition(1, prisma);
+
+        expect(result![0].currentInterviewStep).toBeNull();
+        expect(result![0].averageScore).toBe(80);
+    });
 });

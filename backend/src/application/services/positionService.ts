@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 
 interface CandidateWithStats {
     fullName: string;
-    currentInterviewStep: string;
+    currentInterviewStep: string | null;
     averageScore: number | null;
 }
 
@@ -64,7 +64,7 @@ export const getCandidatesByPosition = async (
 
             return {
                 fullName: `${application.candidate.firstName} ${application.candidate.lastName}`,
-                currentInterviewStep: application.interviewStep?.name ?? 'Unassigned',
+                currentInterviewStep: application.interviewStep?.name ?? null,
                 averageScore: averageScore
             };
         });
