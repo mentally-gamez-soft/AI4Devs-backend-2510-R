@@ -61,10 +61,9 @@ describe('Candidate Endpoints Integration Tests', () => {
                 .put('/candidates/1/stage')
                 .send({ interviewStepId: 99999 });
 
-            if (response.status === 400) {
-                expect(response.body).toHaveProperty('error');
-                expect(response.body.message).toContain('interview step');
-            }
+            expect(response.status).toBe(400);
+            expect(response.body).toHaveProperty('error');
+            expect(response.body.message).toContain('interview step');
         });
 
         it('should return proper JSON content-type headers', async () => {
