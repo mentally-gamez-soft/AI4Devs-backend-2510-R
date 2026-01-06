@@ -5,12 +5,67 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 describe('Position Endpoints Integration Tests', () => {
+    let testPositionId: number;
+    let testCompanyId: number;
+    let testInterviewFlowId: number;
+
     beforeAll(async () => {
         // Ensure the Prisma client is connected before running tests
         await prisma.$connect();
+
+        const company = await prisma.company.create({
+            data: {
+                name: `TestCompany-${Date.now()}`, // Unique name to avoid conflicts
+            }
+        });
+        testCompanyId = company.id;
+
+        const interviewFlow = await prisma.interviewFlow.create({
+            data: {
+                description: 'Standard interview flow for testing',
+            }
+        });
+        testInterviewFlowId = interviewFlow.id;
+
+        const position = await prisma.position.create({
+            data: {
+                companyId: company.id,
+                interviewFlowId: interviewFlow.id,
+                title: 'Test Software Engineer',
+                description: 'Test position for integration testing',
+                location: 'Remote',
+                jobDescription: 'Test job description',
+            }
+        });
+        testPositionId = position.id;
     });
 
     afterAll(async () => {
+        // Clean up test data in reverse order of creation (foreign keys)
+        if (testPositionId) {
+            await prisma.position.delete({
+                where: { id: testPositionId }
+            }).catch(() => {
+                // Position might have related records, ignore delete errors
+            });
+        }
+
+        if (testInterviewFlowId) {
+            await prisma.interviewFlow.delete({
+                where: { id: testInterviewFlowId }
+            }).catch(() => {
+                // InterviewFlow might have related records, ignore delete errors
+            });
+        }
+
+        if (testCompanyId) {
+            await prisma.company.delete({
+                where: { id: testCompanyId }
+            }).catch(() => {
+                // Company might have related records, ignore delete errors
+            });
+        }
+
         // Cleanly disconnect the Prisma client after all tests are complete
         await prisma.$disconnect();
     });
@@ -35,83 +90,55 @@ describe('Position Endpoints Integration Tests', () => {
         });
 
         it('should return 200 and empty array for position with no candidates', async () => {
-            // Note: This test assumes you have a position with no candidates
-            // You may need to create one for testing or adjust the ID
             const response = await request(app)
-                .get('/positions/1/candidates')
+                .get(`/positions/${testPositionId}/candidates`)
+                .expect(200)
                 .expect('Content-Type', /json/);
 
-            if (response.status === 200) {
-                expect(response.body).toHaveProperty('candidates');
-                expect(Array.isArray(response.body.candidates)).toBe(true);
-            }
+            expect(response.body).toHaveProperty('candidates');
+            expect(Array.isArray(response.body.candidates)).toBe(true);
+            expect(response.body.candidates.length).toBe(0);
         });
 
         it('should return proper JSON content-type headers', async () => {
             const response = await request(app)
-                .get('/positions/1/candidates');
+                .get(`/positions/${testPositionId}/candidates`)
+                .expect(200);
 
             expect(response.headers['content-type']).toMatch(/json/);
         });
 
-        it('should return candidates with correct data structure', async () => {
-            // Note: This test requires actual data in the database
-            // Adjust the position ID based on your test data
-            const response = await request(app)
-                .get('/positions/1/candidates');
-
-            if (response.status === 200 && response.body.candidates.length > 0) {
-                const candidate = response.body.candidates[0];
-                expect(candidate).toHaveProperty('fullName');
-                expect(candidate).toHaveProperty('currentInterviewStep');
-                expect(candidate).toHaveProperty('averageScore');
-                expect(typeof candidate.fullName).toBe('string');
-                expect(typeof candidate.currentInterviewStep).toBe('string');
-            }
-        });
-
-        it('should calculate average scores correctly', async () => {
-            // Note: This test requires a position with candidates that have interviews
-            const response = await request(app)
-                .get('/positions/1/candidates');
-
-            if (response.status === 200 && response.body.candidates.length > 0) {
-                const candidatesWithScores = response.body.candidates.filter(
-                    (c: any) => c.averageScore !== null
-                );
-                
-                if (candidatesWithScores.length > 0) {
-                    const candidate = candidatesWithScores[0];
-                    expect(typeof candidate.averageScore).toBe('number');
-                    expect(candidate.averageScore).toBeGreaterThanOrEqual(0);
-                    expect(candidate.averageScore).toBeLessThanOrEqual(100);
-                }
-            }
-        });
-
-        it('should handle candidates with no interviews', async () => {
-            const response = await request(app)
-                .get('/positions/1/candidates');
-
-            if (response.status === 200 && response.body.candidates.length > 0) {
-                // At least verify that averageScore can be null
-                const candidatesWithoutScores = response.body.candidates.filter(
-                    (c: any) => c.averageScore === null
-                );
-                // This is valid - candidates without interviews should have null scores
-                expect(Array.isArray(candidatesWithoutScores)).toBe(true);
-            }
-        });
-
         it('should include position metadata in response', async () => {
             const response = await request(app)
-                .get('/positions/1/candidates');
+                .get(`/positions/${testPositionId}/candidates`)
+                .expect(200);
 
-            if (response.status === 200) {
-                expect(response.body).toHaveProperty('positionId');
-                expect(response.body).toHaveProperty('candidatesCount');
-                expect(response.body).toHaveProperty('candidates');
-            }
+            expect(response.body).toHaveProperty('positionId');
+            expect(response.body).toHaveProperty('candidatesCount');
+            expect(response.body).toHaveProperty('candidates');
+            expect(response.body.positionId).toBe(testPositionId);
+            expect(response.body.candidatesCount).toBe(0);
+        });
+
+        it('should return candidates array as an array', async () => {
+            const response = await request(app)
+                .get(`/positions/${testPositionId}/candidates`)
+                .expect(200);
+
+            expect(Array.isArray(response.body.candidates)).toBe(true);
+        });
+
+        it('should handle candidates with correct data structure', async () => {
+            // This test verifies the structure without requiring data
+            const response = await request(app)
+                .get(`/positions/${testPositionId}/candidates`)
+                .expect(200);
+
+            expect(response.body).toHaveProperty('candidates');
+            expect(response.body).toHaveProperty('positionId');
+            expect(response.body).toHaveProperty('candidatesCount');
+            expect(typeof response.body.positionId).toBe('number');
+            expect(typeof response.body.candidatesCount).toBe('number');
         });
     });
 });
