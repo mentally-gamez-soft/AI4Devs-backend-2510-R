@@ -64,7 +64,7 @@ export const getCandidatesByPosition = async (
 
             return {
                 fullName: `${application.candidate.firstName} ${application.candidate.lastName}`,
-                currentInterviewStep: application.interviewStep.name,
+                currentInterviewStep: application.interviewStep?.name ?? 'Unassigned',
                 averageScore: averageScore
             };
         });
