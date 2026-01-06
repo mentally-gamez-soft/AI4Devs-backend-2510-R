@@ -5,6 +5,16 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 describe('Candidate Endpoints Integration Tests', () => {
+    beforeAll(async () => {
+        // Ensure the Prisma client is connected before running tests
+        await prisma.$connect();
+    });
+
+    afterAll(async () => {
+        // Cleanly disconnect the Prisma client after all tests are complete
+        await prisma.$disconnect();
+    });
+
     describe('PUT /candidates/:id/stage', () => {
         it('should return 400 for invalid candidate ID format', async () => {
             const response = await request(app)
